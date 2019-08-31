@@ -1,0 +1,38 @@
+{
+  "name": "readmes-of-the-world",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "probot run ./index.js",
+    "lint": "standard --fix",
+    "test": "jest && standard",
+    "dev": "nodemon"
+  },
+  "author": "Zeke Sikelianos (https://github.com/zeke)",
+  "license": "MIT",
+  "dependencies": {
+    "probot": "^9.3.2",
+    "probot-config": "^1.0.1"
+  },
+  "devDependencies": {
+    "jest": "^24.7.1",
+    "nodemon": "^1.18.10",
+    "smee-client": "^1.1.0",
+    "standard": "^12.0.1"
+  },
+  "engines": {
+    "node": "10"
+  },
+  "nodemonConfig": {
+    "exec": "npm start",
+    "watch": [
+      ".env",
+      "."
+    ]
+  },
+  "standard": {
+    "env": [
+      "jest"
+    ]
+  }
+}
