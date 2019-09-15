@@ -3,6 +3,7 @@ require('dotenv').config()
 const { createProbot } = require('probot')
 const getPrivateKey = require('./lib/get-private-key')
 const createServer = require('./lib/server')
+const robot = require('./lib/robot')
 
 process.on('unhandledRejection', (reason, p) => {
   console.log('Unhandled Rejection at: Promise', p, 'reason:', reason)
@@ -29,21 +30,13 @@ if (process.env.SMEE_CHANNEL) {
   })
 }
 
-// Create the actual server
+// load the Probot webhook handler
+probot.load(robot)
+
+// create the Express server
 const server = createServer({ ...probot, id: program.id, cert })
 
 server.listen(program.port, () => {
-  console.log('👂listening')
+  console.log('👂listening 👂')
   probot.logger.info('Listening on http://localhost:' + program.port)
 })
-
-// module.exports = function (probot) {
-//
-//   console.log(Object.keys(probot))
-
-//   probot.app.use(bodyParser.urlencoded({ extended: false }))
-//   probot.app.use(bodyParser.json())
-//   probot.app.use(crowdinWebhookListener)
-
-//   probot.on('push', handlePush)
-// }
