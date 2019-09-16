@@ -1,42 +1,31 @@
-require('dotenv').config()
+const bodyParser = require('body-parser')
+const crowdinWebhookListener = require('./lib/crowdin-webhook-listener')
+const handlePush = require('./lib/handle-push')
 
-const { createProbot } = require('probot')
-const getPrivateKey = require('./lib/get-private-key')
-const createServer = require('./lib/server')
-const robot = require('./lib/robot')
+module.exports = async function (app) {
+  console.log('👂👂👂 listening 👂👂👂')
+  // app.on('*', async context => {
+  //   console.log('event!!!!')
+  //   const auth = await context.github.apps.getAuthenticated()
+  //   console.log('auth', auth)
+  // })
 
+  app.on('push', handlePush)
+
+  const router = app.route('/crowdin')
+  router.use(bodyParser.urlencoded({ extended: false }))
+  router.use(bodyParser.json())
+  router.use((await crowdinWebhookListener(app)))
+
+  // const server = app.route()
+  // server.get('/whoami', async (req, res) => {
+  //   const octokit = await app.auth()
+  //   const { data } = await octokit.apps.getAuthenticated()
+  //   res.json(data)
+  // })
+
+  return app
+}
 process.on('unhandledRejection', (reason, p) => {
   console.log('Unhandled Rejection at: Promise', p, 'reason:', reason)
-})
-
-const program = {
-  id: process.env.APP_ID,
-  port: process.env.PORT || 3000,
-  secret: process.env.WEBHOOK_SECRET,
-  clientid: process.env.CLIENT_ID,
-  clientsecret: process.env.CLIENT_SECRET
-}
-
-const cert = getPrivateKey()
-const probot = createProbot({ ...program, cert })
-
-if (process.env.SMEE_CHANNEL) {
-  const { createWebhookProxy } = require('probot/lib/webhook-proxy')
-  createWebhookProxy({
-    url: `https://smee.io/${process.env.SMEE_CHANNEL}`,
-    port: program.port,
-    path: '/',
-    logger: probot.logger
-  })
-}
-
-// load the Probot webhook handler
-probot.load(robot)
-
-// create the Express server
-const server = createServer({ ...probot, id: program.id, cert })
-
-server.listen(program.port, () => {
-  console.log('👂listening 👂')
-  probot.logger.info('Listening on http://localhost:' + program.port)
 })
